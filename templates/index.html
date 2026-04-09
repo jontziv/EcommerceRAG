@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}ShopWise — Find exactly what you need{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ────────────────────────────────────────────────────────────── -->
+<section class="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900 py-24 px-4">
+  <!-- decorative blobs -->
+  <div class="absolute -top-20 -left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="relative max-w-3xl mx-auto text-center">
+    <p class="text-indigo-200 text-sm font-semibold tracking-widest uppercase mb-3">AI-Powered Shopping</p>
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight">
+      Find exactly what<br class="hidden sm:block"> you need
+    </h1>
+    <p class="text-indigo-100 text-lg mb-10">
+      Just describe your situation — our AI will find the perfect products
+    </p>
+
+    <!-- Search bar -->
+    <div class="flex gap-2 bg-white dark:bg-gray-900 rounded-2xl p-2 shadow-2xl max-w-2xl mx-auto">
+      <input
+        id="searchInput"
+        type="text"
+        autocomplete="off"
+        placeholder="going to the beach…"
+        class="flex-1 px-4 py-3 rounded-xl bg-transparent outline-none text-gray-900 dark:text-gray-100 text-base placeholder-gray-400"
+      />
+      <button
+        id="searchBtn"
+        class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl transition-all duration-150 shadow-md whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Search
+      </button>
+    </div>
+
+    <!-- Suggestion chips -->
+    <div class="mt-5 flex flex-wrap justify-center gap-2">
+      <span class="text-indigo-300 text-sm mr-1 self-center">Try:</span>
+      <button class="chip px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm transition">going to the beach</button>
+      <button class="chip px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm transition">gift for my dad</button>
+      <button class="chip px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm transition">office party outfit</button>
+      <button class="chip px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm transition">running a marathon</button>
+      <button class="chip px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-sm transition">cosy rainy day</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Results ──────────────────────────────────────────────────────────── -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+  <!-- Skeleton loading -->
+  <div id="loadingState" class="hidden">
+    <div class="h-20 bg-amber-100 dark:bg-amber-900/20 rounded-2xl animate-pulse mb-8"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 animate-pulse"><div class="h-48 bg-gray-200 dark:bg-gray-700"></div><div class="p-4 space-y-3"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div><div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div></div></div>
+      <div class="rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 animate-pulse"><div class="h-48 bg-gray-200 dark:bg-gray-700"></div><div class="p-4 space-y-3"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div><div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div></div></div>
+      <div class="rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 animate-pulse hidden sm:block"><div class="h-48 bg-gray-200 dark:bg-gray-700"></div><div class="p-4 space-y-3"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div><div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div></div></div>
+      <div class="rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 animate-pulse hidden lg:block"><div class="h-48 bg-gray-200 dark:bg-gray-700"></div><div class="p-4 space-y-3"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div><div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div></div></div>
+    </div>
+  </div>
+
+  <!-- AI answer blurb -->
+  <div id="aiAnswerSection" class="hidden mb-8">
+    <div class="flex gap-4 items-start p-5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-2xl">
+      <span class="text-2xl mt-0.5 shrink-0">✨</span>
+      <div>
+        <p class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-1">AI Recommendation</p>
+        <p id="aiAnswerText" class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product grid -->
+  <div id="productGrid" class="hidden">
+    <h2 id="resultHeading" class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6"></h2>
+    <div id="productList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="emptyState" class="hidden text-center py-24">
+    <div class="text-6xl mb-4">🔍</div>
+    <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">No products found</h3>
+    <p class="text-gray-400 dark:text-gray-500">Try a different or broader description</p>
+  </div>
+
+</section>
+
+<!-- Error toast -->
+<div id="errorToast"
+  class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-xl shadow-xl text-sm font-medium z-50 max-w-sm text-center">
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ── Placeholder cycling ────────────────────────────────────────────────
+  const placeholders = [
+    "going to the beach…",
+    "gift for my dad…",
+    "cosy rainy day at home…",
+    "office party outfit…",
+    "running a marathon…",
+    "camping in the mountains…",
+    "working from home all day…",
+  ];
+  let pIdx = 0;
+  const inp = document.getElementById('searchInput');
+  setInterval(() => {
+    pIdx = (pIdx + 1) % placeholders.length;
+    inp.placeholder = placeholders[pIdx];
+  }, 2500);
+
+  // ── Suggestion chips ───────────────────────────────────────────────────
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      inp.value = chip.textContent;
+      doSearch();
+    });
+  });
+
+  // ── Search triggers ────────────────────────────────────────────────────
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+  function sanitize(str) {
+    const d = document.createElement('div');
+    d.textContent = String(str ?? '').substring(0, 500);
+    return d.innerHTML;
+  }
+
+  function formatPrice(price) {
+    return '\u20b9' + Number(price).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  function showError(msg) {
+    const t = document.getElementById('errorToast');
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    setTimeout(() => t.classList.add('hidden'), 5000);
+  }
+
+  function renderCard(p) {
+    const fallback = 'https://placehold.co/300x200/e0e7ff/6366f1?text=Product';
+    return `
+      <div class="group flex flex-col bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm
+                  hover:shadow-xl border border-gray-100 dark:border-gray-800 transition-all duration-200">
+        <div class="relative overflow-hidden bg-gray-50 dark:bg-gray-800">
+          <img
+            src="${sanitize(p.image_url)}"
+            alt="${sanitize(p.name)}"
+            onerror="this.onerror=null;this.src='${fallback}'"
+            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <span class="absolute top-3 left-3 px-2.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/80
+                       text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded-full">
+            ${sanitize(p.category)}
+          </span>
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-2 mb-1">
+            ${sanitize(p.name)}
+          </h3>
+          <p class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mb-2">${formatPrice(p.price)}</p>
+          <p class="text-gray-500 dark:text-gray-400 text-xs line-clamp-2 mb-4 flex-1">
+            ${sanitize(p.description)}
+          </p>
+          <button
+            class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800
+                   text-white text-sm font-semibold rounded-xl transition-colors duration-150"
+          >
+            View Product
+          </button>
+        </div>
+      </div>`;
+  }
+
+  // ── Core search function ───────────────────────────────────────────────
+  async function doSearch() {
+    const query = inp.value.trim();
+    if (!query) { inp.focus(); return; }
+
+    const btn = document.getElementById('searchBtn');
+    const loading = document.getElementById('loadingState');
+    const aiSection = document.getElementById('aiAnswerSection');
+    const grid = document.getElementById('productGrid');
+    const empty = document.getElementById('emptyState');
+
+    // Reset
+    btn.disabled = true;
+    loading.classList.remove('hidden');
+    aiSection.classList.add('hidden');
+    grid.classList.add('hidden');
+    empty.classList.add('hidden');
+
+    try {
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, category: null }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Unknown error' }));
+        throw new Error(err.detail || `Server error (${res.status})`);
+      }
+
+      const data = await res.json();
+
+      // Show AI answer
+      if (data.answer) {
+        document.getElementById('aiAnswerText').textContent = data.answer;
+        aiSection.classList.remove('hidden');
+      }
+
+      // Show products
+      const list = document.getElementById('productList');
+      list.innerHTML = '';
+
+      if (data.products && data.products.length > 0) {
+        document.getElementById('resultHeading').textContent =
+          `${data.products.length} product${data.products.length !== 1 ? 's' : ''} for "${query}"`;
+        data.products.forEach(p => list.insertAdjacentHTML('beforeend', renderCard(p)));
+        grid.classList.remove('hidden');
+      } else {
+        empty.classList.remove('hidden');
+      }
+
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      btn.disabled = false;
+      loading.classList.add('hidden');
+    }
+  }
+</script>
+{% endblock %}
