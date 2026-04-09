@@ -56,8 +56,9 @@ coverage.xml
 *.log
 logs/
 
-# Uploads (keep directory, ignore data files)
+# Uploads — ignore user-uploaded files but keep the bundled seed data
 uploads/*.csv
+!uploads/product_real_data.csv
 
 # Docker
 docker-compose.override.yml

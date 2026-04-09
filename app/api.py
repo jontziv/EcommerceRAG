@@ -1,18 +1,50 @@
 import asyncio
 import time
+from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func, select as sa_select
 
-from .models import SearchQuery, SearchResult
+from .database import AsyncSessionLocal
+from .models import SearchQuery, SearchResult, Product
 from .search import search_products
 from .vectorization import vectorize_products
 
-app = FastAPI(title="ShopWise")
-templates = Jinja2Templates(directory="templates")
-
 _vectorize_lock = asyncio.Lock()
+
+
+async def _auto_seed():
+    """On first deploy, vectorize the bundled product CSV automatically."""
+    csv_path = Path(__file__).parent.parent / "uploads" / "product_real_data.csv"
+    if not csv_path.exists():
+        print("[startup] Seed CSV not found — skipping auto-seed")
+        return
+    try:
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(sa_select(func.count()).select_from(Product))
+            count = result.scalar()
+        if count == 0:
+            print("[startup] Empty database — seeding from product_real_data.csv…")
+            async with _vectorize_lock:
+                stats = await vectorize_products(csv_path.read_bytes(), csv_path.name)
+            print(f"[startup] Seeded {stats['products']} products, {stats['chunks']} chunks")
+        else:
+            print(f"[startup] {count} products already in database — skipping seed")
+    except Exception as exc:
+        print(f"[startup] Auto-seed error (non-fatal): {exc}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await _auto_seed()
+    yield
+
+
+app = FastAPI(title="ShopWise", lifespan=lifespan)
+templates = Jinja2Templates(directory="templates")
 
 
 @app.exception_handler(Exception)
