@@ -13,19 +13,32 @@ _raw_url = os.getenv("DATABASE_URL", "")
 # psycopg3 → for LangChain PGVector (needs plain postgresql:// URI, no driver prefix)
 
 def _to_asyncpg(url: str) -> str:
+    """Derive an asyncpg-compatible URL for SQLAlchemy."""
     if url.startswith("postgresql+asyncpg://"):
-        return url
-    if url.startswith("postgresql+psycopg://"):
-        return "postgresql+asyncpg://" + url[len("postgresql+psycopg://"):]
-    if url.startswith("postgresql://"):
-        return "postgresql+asyncpg://" + url[len("postgresql://"):]
-    return url
+        base = url
+    elif url.startswith("postgresql+psycopg://"):
+        base = "postgresql+asyncpg://" + url[len("postgresql+psycopg://"):]
+    elif url.startswith("postgresql://"):
+        base = "postgresql+asyncpg://" + url[len("postgresql://"):]
+    else:
+        base = url
+    # asyncpg uses ssl=true query param
+    if "ssl" not in base and "supabase" in base:
+        sep = "&" if "?" in base else "?"
+        base += sep + "ssl=true"
+    return base
+
 
 def _to_psycopg3(url: str) -> str:
     """Strip driver prefix — psycopg3 expects plain postgresql:// URIs."""
     for prefix in ("postgresql+psycopg://", "postgresql+asyncpg://"):
         if url.startswith(prefix):
-            return "postgresql://" + url[len(prefix):]
+            url = "postgresql://" + url[len(prefix):]
+            break
+    # psycopg3 uses sslmode=require
+    if "sslmode" not in url and "supabase" in url:
+        sep = "&" if "?" in url else "?"
+        url += sep + "sslmode=require"
     return url
 
 _async_url   = _to_asyncpg(_raw_url)

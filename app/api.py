@@ -1,10 +1,12 @@
 import asyncio
+import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select as sa_select
 
@@ -16,8 +18,25 @@ from .vectorization import vectorize_products
 _vectorize_lock = asyncio.Lock()
 
 
+def _masked_url(url: str) -> str:
+    """Return a log-safe version of the DB URL with password hidden."""
+    try:
+        p = urlparse(url)
+        return f"{p.scheme}://***@{p.hostname}:{p.port}{p.path}"
+    except Exception:
+        return "(unparseable URL)"
+
+
 async def _auto_seed():
     """On first deploy, vectorize the bundled product CSV automatically."""
+    db_url = os.getenv("DATABASE_URL", "")
+    if not db_url:
+        print("[startup] ⚠️  DATABASE_URL is not set — skipping auto-seed")
+        print("[startup] ⚠️  Add DATABASE_URL in Render > Environment before searches will work")
+        return
+
+    print(f"[startup] Using database: {_masked_url(db_url)}")
+
     csv_path = Path(__file__).parent.parent / "uploads" / "product_real_data.csv"
     if not csv_path.exists():
         print("[startup] Seed CSV not found — skipping auto-seed")
@@ -30,11 +49,13 @@ async def _auto_seed():
             print("[startup] Empty database — seeding from product_real_data.csv…")
             async with _vectorize_lock:
                 stats = await vectorize_products(csv_path.read_bytes(), csv_path.name)
-            print(f"[startup] Seeded {stats['products']} products, {stats['chunks']} chunks")
+            print(f"[startup] ✅ Seeded {stats['products']} products, {stats['chunks']} chunks")
         else:
             print(f"[startup] {count} products already in database — skipping seed")
     except Exception as exc:
-        print(f"[startup] Auto-seed error (non-fatal): {exc}")
+        print(f"[startup] ❌ Auto-seed error: {exc}")
+        print("[startup] Check DATABASE_URL value in Render > Environment tab")
+        print(f"[startup] URL being used: {_masked_url(db_url)}")
 
 
 @asynccontextmanager
@@ -57,6 +78,12 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.head("/")
+async def head_home():
+    """Explicit HEAD handler required for Starlette 1.x health checks."""
+    return Response(status_code=200)
 
 
 @app.get("/admin")
