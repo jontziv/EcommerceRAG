@@ -1,8 +1,7 @@
 import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
-from langchain_openai import OpenAIEmbeddings
-from langchain_postgres import PGVector
+from langchain_cohere import CohereEmbeddings
 
 Base = declarative_base()
 
@@ -22,10 +21,10 @@ def _to_asyncpg(url: str) -> str:
         base = "postgresql+asyncpg://" + url[len("postgresql://"):]
     else:
         base = url
-    # asyncpg uses ssl=true query param
+    # asyncpg ssl param must be a mode name (not a boolean)
     if "ssl" not in base and "supabase" in base:
         sep = "&" if "?" in base else "?"
-        base += sep + "ssl=true"
+        base += sep + "ssl=require"
     return base
 
 
@@ -48,20 +47,9 @@ async_engine = create_async_engine(_async_url, pool_pre_ping=True, future=True)
 AsyncSessionLocal = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 
 # Embeddings model (shared)
-embeddings = OpenAIEmbeddings(
-    model="text-embedding-3-small",
-    openai_api_key=os.getenv("OPENAI_API_KEY"),
+embeddings = CohereEmbeddings(
+    model="embed-english-v3.0",
+    cohere_api_key=os.getenv("COHERE_API_KEY"),
 )
 
 COLLECTION_NAME = "shopwise_products"
-
-
-def get_vector_store() -> PGVector:
-    """Return a PGVector store backed by Supabase."""
-    # use_jsonb=False avoids SQLAlchemy cache-key hashing errors with dict metadata
-    return PGVector(
-        connection=_pgvector_url,
-        embeddings=embeddings,
-        collection_name=COLLECTION_NAME,
-        use_jsonb=False,
-    )

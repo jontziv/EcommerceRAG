@@ -133,7 +133,7 @@
   }
 
   function formatPrice(price) {
-    return '\u20b9' + Number(price).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    return '€' + Number(price).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function showError(msg) {

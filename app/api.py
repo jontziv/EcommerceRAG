@@ -77,7 +77,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 @app.get("/")
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.head("/")
@@ -88,7 +88,7 @@ async def head_home():
 
 @app.get("/admin")
 async def admin_page(request: Request):
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return templates.TemplateResponse(request, "admin.html")
 
 
 # ── API ──────────────────────────────────────────────────────────────────────

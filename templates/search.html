@@ -201,7 +201,7 @@ async function search() {
             <div class="product-card p-2 h-100">
               <img src="${p.image_url}" class="img-fluid product-img w-100 mb-2" alt="${p.name}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x220?text=No+Image';">
               <div class="product-title mb-1">${p.name}</div>
-              <div class="price mb-1">₹${p.price}</div>
+              <div class="price mb-1">€${p.price}</div>
               <div class="category-badge mb-2">${p.category}</div>
               <div class="product-description text-muted" style="font-size: 0.9rem;">${p.description}</div>
             </div>
@@ -254,7 +254,7 @@ document.getElementById("sendBtn").onclick = async () => {
           <div class="product-card p-2 mt-2">
             <img src="${p.image_url}" class="img-fluid product-img w-100 mb-2" alt="${p.name}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x220?text=No+Image';">
             <div class="product-title mb-1">${p.name}</div>
-            <div class="price mb-1">₹${p.price}</div>
+            <div class="price mb-1">€${p.price}</div>
             <div class="category-badge mb-2">${p.category}</div>
             <div class="product-description text-muted" style="font-size: 0.85rem;">${p.description}</div>
           </div>

@@ -5,7 +5,7 @@ from typing import Optional, List, Sequence
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_cohere import CohereRerank
 from sqlalchemy import text, select
 
@@ -92,8 +92,8 @@ async def search_products(query: str, category: Optional[str] = None) -> SearchR
     compressor = CohereRerank(top_n=3, model="rerank-multilingual-v3.0")
     docs = list(await compressor.acompress_documents(initial_docs, query))
 
-    # 3. GPT-4o answer via LCEL
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.2, api_key=os.getenv("OPENAI_API_KEY"))
+    # 3. Llama 3.3 70B via Groq
+    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.2, api_key=os.getenv("GROQ_API_KEY"))
     chain = PROMPT | llm | StrOutputParser()
     answer: str = await chain.ainvoke({"input": query, "context": _format_docs(docs)})
 
