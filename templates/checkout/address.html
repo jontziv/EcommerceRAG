@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Shipping Address — ShopWise{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <a href="/" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Continue shopping
+    </a>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Checkout</h1>
+
+    <!-- Steps -->
+    <div class="flex items-center gap-2 mt-4">
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+        <span class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Shipping</span>
+      </div>
+      <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold flex items-center justify-center">2</span>
+        <span class="text-sm text-gray-400 dark:text-gray-500">Payment</span>
+      </div>
+      <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold flex items-center justify-center">3</span>
+        <span class="text-sm text-gray-400 dark:text-gray-500">Confirmation</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Form -->
+    <div class="lg:col-span-2">
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Shipping Address</h2>
+
+        <form id="addressForm" class="space-y-5" novalidate>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">First Name <span class="text-red-500">*</span></label>
+              <input type="text" name="firstName" required placeholder="John"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                       text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Last Name <span class="text-red-500">*</span></label>
+              <input type="text" name="lastName" required placeholder="Doe"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                       text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email Address <span class="text-red-500">*</span></label>
+            <input type="email" name="email" required placeholder="john@example.com"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                     text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone Number</label>
+            <input type="tel" name="phone" placeholder="+1 (555) 000-0000"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                     text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Address Line 1 <span class="text-red-500">*</span></label>
+            <input type="text" name="address1" required placeholder="123 Main Street"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                     text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Address Line 2</label>
+            <input type="text" name="address2" placeholder="Apt, suite, unit (optional)"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                     text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div class="col-span-2 sm:col-span-1">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">City <span class="text-red-500">*</span></label>
+              <input type="text" name="city" required placeholder="New York"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                       text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">State</label>
+              <input type="text" name="state" placeholder="NY"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                       text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">ZIP Code <span class="text-red-500">*</span></label>
+              <input type="text" name="zip" required placeholder="10001"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                       text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Country <span class="text-red-500">*</span></label>
+            <select name="country" required
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                     text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="CA">Canada</option>
+              <option value="AU">Australia</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="JP">Japan</option>
+              <option value="IN">India</option>
+            </select>
+          </div>
+
+          <!-- Error message -->
+          <div id="formError" class="hidden text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3"></div>
+
+          <button type="submit"
+            class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-2xl text-base transition-colors duration-150 shadow-md">
+            Continue to Payment →
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order summary -->
+    <div>
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 sticky top-20">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Order Summary</h2>
+        <div id="orderItems" class="space-y-3 mb-4 max-h-64 overflow-y-auto"></div>
+        <hr class="border-gray-100 dark:border-gray-800 mb-4">
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>Subtotal</span>
+            <span id="summarySubtotal">$0.00</span>
+          </div>
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>Shipping</span>
+            <span class="text-green-600 dark:text-green-400">FREE</span>
+          </div>
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>Tax (est.)</span>
+            <span id="summaryTax">$0.00</span>
+          </div>
+        </div>
+        <hr class="border-gray-100 dark:border-gray-800 my-4">
+        <div class="flex justify-between font-bold text-gray-900 dark:text-gray-100">
+          <span>Total</span>
+          <span id="summaryTotal">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ── Render order summary ────────────────────────────────────────────────
+  function renderSummary() {
+    const cart = getCart();
+    const container = document.getElementById('orderItems');
+    const fallback = 'https://placehold.co/48x48/e0e7ff/6366f1?text=Item';
+
+    if (cart.items.length === 0) {
+      container.innerHTML = '<p class="text-sm text-gray-400 dark:text-gray-500">Your cart is empty.</p>';
+      return;
+    }
+
+    container.innerHTML = cart.items.map(item => `
+      <div class="flex items-center gap-3">
+        <div class="relative shrink-0">
+          <img src="${item.image_url || fallback}" onerror="this.src='${fallback}'"
+            alt="${item.name}" class="w-12 h-12 rounded-lg object-cover bg-gray-100 dark:bg-gray-800" />
+          <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center">${item.quantity}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-medium text-gray-800 dark:text-gray-200 line-clamp-2">${item.name}</p>
+        </div>
+        <p class="text-xs font-bold text-gray-900 dark:text-gray-100 shrink-0">$${(item.price * item.quantity).toFixed(2)}</p>
+      </div>
+    `).join('');
+
+    const subtotal = cart.items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const tax = subtotal * 0.08;
+    document.getElementById('summarySubtotal').textContent = '$' + subtotal.toFixed(2);
+    document.getElementById('summaryTax').textContent = '$' + tax.toFixed(2);
+    document.getElementById('summaryTotal').textContent = '$' + (subtotal + tax).toFixed(2);
+  }
+
+  renderSummary();
+
+  // ── Form submission ─────────────────────────────────────────────────────
+  document.getElementById('addressForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const errDiv = document.getElementById('formError');
+
+    // Basic validation
+    const required = ['firstName', 'lastName', 'email', 'address1', 'city', 'zip', 'country'];
+    const missing = required.filter(n => !form[n].value.trim());
+    if (missing.length) {
+      errDiv.textContent = 'Please fill in all required fields.';
+      errDiv.classList.remove('hidden');
+      return;
+    }
+
+    const emailVal = form.email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      errDiv.textContent = 'Please enter a valid email address.';
+      errDiv.classList.remove('hidden');
+      return;
+    }
+
+    errDiv.classList.add('hidden');
+
+    // Save address to sessionStorage
+    const address = {};
+    new FormData(form).forEach((v, k) => { address[k] = v; });
+    sessionStorage.setItem('sw_address', JSON.stringify(address));
+
+    window.location.href = '/checkout/payment';
+  });
+</script>
+{% endblock %}

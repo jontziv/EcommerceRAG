@@ -12,11 +12,11 @@ from sqlalchemy import text, select
 from .database import AsyncSessionLocal, async_engine, embeddings, COLLECTION_NAME
 from .models import Product, SearchResult
 
-SYSTEM = """You are a friendly product search assistant for ShopWise, a modern e-commerce store.
-Help customers find the best products based on their lifestyle needs and context.
+SYSTEM = """You are a knowledgeable electronics product assistant for ShopWise, an AI-powered electronics store.
+Help customers find the best gadgets and electronics based on their needs and use case.
 Use the provided product catalog to give concise, helpful recommendations (2-4 sentences).
-Highlight why each product fits the customer's described situation.
-If no products match, suggest refining the search. Do NOT invent products not in the catalog."""
+Mention relevant specs, brand, and why the product fits the customer's situation.
+If no products match well, suggest refining the search. Do NOT invent products not in the catalog."""
 
 PROMPT = ChatPromptTemplate.from_messages([
     ("system", SYSTEM),
@@ -120,6 +120,11 @@ async def search_products(query: str, category: Optional[str] = None) -> SearchR
                     "price": float(p.price) if p.price is not None else 0.0,
                     "category": p.category,
                     "image_url": p.image_url,
+                    "rating": float(p.rating) if p.rating is not None else 0.0,
+                    "review_count": int(p.review_count) if p.review_count is not None else 0,
+                    "brand": p.brand or "",
+                    "prime_eligible": bool(p.prime_eligible),
+                    "features": p.features if isinstance(p.features, list) else [],
                 }
                 for p in db_products
             ]

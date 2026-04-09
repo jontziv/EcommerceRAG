@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% block title %}Payment — ShopWise{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <a href="/checkout" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to shipping
+    </a>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Payment</h1>
+
+    <!-- Steps -->
+    <div class="flex items-center gap-2 mt-4">
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </span>
+        <span class="text-sm text-green-600 dark:text-green-400 font-medium">Shipping</span>
+      </div>
+      <div class="flex-1 h-px bg-indigo-300 dark:bg-indigo-600"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+        <span class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Payment</span>
+      </div>
+      <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold flex items-center justify-center">3</span>
+        <span class="text-sm text-gray-400 dark:text-gray-500">Confirmation</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Payment form -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Shipping address recap -->
+      <div id="addressRecap" class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Ship to</h3>
+          <a href="/checkout" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Edit</a>
+        </div>
+        <p id="addressText" class="text-sm text-gray-600 dark:text-gray-400"></p>
+      </div>
+
+      <!-- Card form -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Card Details</h2>
+          <div class="flex gap-2 text-2xl">💳 🔒</div>
+        </div>
+
+        <!-- Test card notice -->
+        <div class="mb-5 flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl text-sm">
+          <span class="text-amber-500 shrink-0 mt-0.5">ℹ️</span>
+          <div class="text-amber-700 dark:text-amber-400">
+            <strong>Demo mode</strong> — use any card number. No real charges will be made.
+          </div>
+        </div>
+
+        <form id="paymentForm" class="space-y-5" novalidate autocomplete="off">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cardholder Name <span class="text-red-500">*</span></label>
+            <input type="text" name="cardName" required placeholder="John Doe"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                     text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Card Number <span class="text-red-500">*</span></label>
+            <input type="text" name="cardNumber" required placeholder="4242 4242 4242 4242"
+              maxlength="19" inputmode="numeric"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                     text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Expiry Date <span class="text-red-500">*</span></label>
+              <input type="text" name="expiry" required placeholder="MM / YY"
+                maxlength="7" inputmode="numeric"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                       text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">CVV <span class="text-red-500">*</span></label>
+              <input type="text" name="cvv" required placeholder="•••"
+                maxlength="4" inputmode="numeric"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                       text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            </div>
+          </div>
+
+          <!-- Error -->
+          <div id="formError" class="hidden text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3"></div>
+
+          <!-- Submit -->
+          <button type="submit" id="submitBtn"
+            class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-2xl text-base transition-all duration-150 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <span id="submitLabel">Pay Now</span>
+          </button>
+        </form>
+
+        <div class="flex items-center justify-center gap-2 mt-5 text-xs text-gray-400 dark:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          Your payment info is encrypted and secure
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Order summary -->
+    <div>
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 sticky top-20">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Order Summary</h2>
+        <div id="orderItems" class="space-y-3 mb-4 max-h-64 overflow-y-auto"></div>
+        <hr class="border-gray-100 dark:border-gray-800 mb-4">
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>Subtotal</span>
+            <span id="summarySubtotal">$0.00</span>
+          </div>
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>Shipping</span>
+            <span class="text-green-600 dark:text-green-400">FREE</span>
+          </div>
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>Tax (8%)</span>
+            <span id="summaryTax">$0.00</span>
+          </div>
+        </div>
+        <hr class="border-gray-100 dark:border-gray-800 my-4">
+        <div class="flex justify-between font-bold text-gray-900 dark:text-gray-100 text-lg">
+          <span>Total</span>
+          <span id="summaryTotal">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ── Load address recap ─────────────────────────────────────────────────
+  const address = JSON.parse(sessionStorage.getItem('sw_address') || '{}');
+  if (address.firstName) {
+    const parts = [
+      `${address.firstName} ${address.lastName}`,
+      address.address1,
+      address.address2,
+      `${address.city}${address.state ? ', ' + address.state : ''} ${address.zip}`,
+      address.country,
+    ].filter(Boolean);
+    document.getElementById('addressText').textContent = parts.join(' · ');
+  } else {
+    document.getElementById('addressRecap').classList.add('hidden');
+  }
+
+  // ── Render order summary ────────────────────────────────────────────────
+  function renderSummary() {
+    const cart = getCart();
+    const container = document.getElementById('orderItems');
+    const fallback = 'https://placehold.co/48x48/e0e7ff/6366f1?text=Item';
+
+    container.innerHTML = cart.items.map(item => `
+      <div class="flex items-center gap-3">
+        <div class="relative shrink-0">
+          <img src="${item.image_url || fallback}" onerror="this.src='${fallback}'"
+            alt="${item.name}" class="w-12 h-12 rounded-lg object-cover bg-gray-100 dark:bg-gray-800" />
+          <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center">${item.quantity}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-medium text-gray-800 dark:text-gray-200 line-clamp-2">${item.name}</p>
+        </div>
+        <p class="text-xs font-bold text-gray-900 dark:text-gray-100 shrink-0">$${(item.price * item.quantity).toFixed(2)}</p>
+      </div>
+    `).join('');
+
+    const subtotal = cart.items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const tax = subtotal * 0.08;
+    document.getElementById('summarySubtotal').textContent = '$' + subtotal.toFixed(2);
+    document.getElementById('summaryTax').textContent = '$' + tax.toFixed(2);
+    document.getElementById('summaryTotal').textContent = '$' + (subtotal + tax).toFixed(2);
+
+    return { subtotal, tax, total: subtotal + tax };
+  }
+
+  const { total } = renderSummary();
+
+  // ── Card number formatting ─────────────────────────────────────────────
+  document.querySelector('[name="cardNumber"]').addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+  });
+
+  document.querySelector('[name="expiry"]').addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length > 2) v = v.slice(0, 2) + ' / ' + v.slice(2);
+    e.target.value = v;
+  });
+
+  document.querySelector('[name="cvv"]').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+  });
+
+  // ── Form submission ─────────────────────────────────────────────────────
+  document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const errDiv = document.getElementById('formError');
+    const btn = document.getElementById('submitBtn');
+    const label = document.getElementById('submitLabel');
+
+    const cardName   = form.cardName.value.trim();
+    const cardNumber = form.cardNumber.value.replace(/\s/g, '');
+    const expiry     = form.expiry.value.replace(/\s/g, '');
+    const cvv        = form.cvv.value.trim();
+
+    if (!cardName || !cardNumber || !expiry || !cvv) {
+      errDiv.textContent = 'Please fill in all card details.';
+      errDiv.classList.remove('hidden');
+      return;
+    }
+
+    if (cardNumber.length < 12) {
+      errDiv.textContent = 'Please enter a valid card number.';
+      errDiv.classList.remove('hidden');
+      return;
+    }
+
+    errDiv.classList.add('hidden');
+
+    // Simulate payment processing
+    btn.disabled = true;
+    label.textContent = 'Processing payment…';
+
+    await new Promise(r => setTimeout(r, 1800));
+
+    // Generate mock order number and save to sessionStorage
+    const orderNumber = 'SW-' + Date.now().toString(36).toUpperCase().slice(-8);
+    sessionStorage.setItem('sw_order', JSON.stringify({
+      orderNumber,
+      total: total.toFixed(2),
+      items: getCart().items,
+      address,
+    }));
+
+    // Clear cart
+    clearCart();
+
+    window.location.href = '/checkout/confirmation';
+  });
+</script>
+{% endblock %}

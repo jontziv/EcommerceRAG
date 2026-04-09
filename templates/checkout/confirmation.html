@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed — ShopWise{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+  <!-- Success header -->
+  <div class="text-center mb-10">
+    <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 dark:bg-green-900/40 rounded-full mb-5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+      </svg>
+    </div>
+    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">Order Confirmed!</h1>
+    <p class="text-gray-500 dark:text-gray-400">Thanks for your purchase. We'll send a confirmation email shortly.</p>
+
+    <!-- Steps completed -->
+    <div class="flex items-center justify-center gap-2 mt-6">
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </span>
+        <span class="text-sm text-green-600 dark:text-green-400 font-medium">Shipping</span>
+      </div>
+      <div class="flex-1 h-px bg-green-400 dark:bg-green-600 max-w-16"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </span>
+        <span class="text-sm text-green-600 dark:text-green-400 font-medium">Payment</span>
+      </div>
+      <div class="flex-1 h-px bg-green-400 dark:bg-green-600 max-w-16"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </span>
+        <span class="text-sm text-green-600 dark:text-green-400 font-medium">Confirmed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order card -->
+  <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-6">
+
+    <!-- Order number + date -->
+    <div class="bg-indigo-50 dark:bg-indigo-950/40 px-6 py-4 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <p class="text-xs text-indigo-500 dark:text-indigo-400 font-semibold uppercase tracking-wider">Order Number</p>
+        <p id="orderNumber" class="text-xl font-bold text-indigo-700 dark:text-indigo-300 font-mono tracking-wide"></p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-gray-500 dark:text-gray-400">Order placed</p>
+        <p id="orderDate" class="text-sm font-semibold text-gray-700 dark:text-gray-300"></p>
+      </div>
+    </div>
+
+    <!-- Items -->
+    <div class="px-6 py-5">
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Items Ordered</h3>
+      <div id="orderItems" class="space-y-4"></div>
+    </div>
+
+    <hr class="border-gray-100 dark:border-gray-800">
+
+    <!-- Totals -->
+    <div class="px-6 py-4 space-y-2 text-sm">
+      <div class="flex justify-between text-gray-600 dark:text-gray-400">
+        <span>Subtotal</span>
+        <span id="orderSubtotal"></span>
+      </div>
+      <div class="flex justify-between text-gray-600 dark:text-gray-400">
+        <span>Shipping</span>
+        <span class="text-green-600 dark:text-green-400">FREE</span>
+      </div>
+      <div class="flex justify-between text-gray-600 dark:text-gray-400">
+        <span>Tax (8%)</span>
+        <span id="orderTax"></span>
+      </div>
+    </div>
+
+    <hr class="border-gray-100 dark:border-gray-800">
+
+    <div class="px-6 py-4 flex justify-between font-bold text-gray-900 dark:text-gray-100 text-lg">
+      <span>Total Charged</span>
+      <span id="orderTotal"></span>
+    </div>
+
+    <!-- Shipping address -->
+    <hr class="border-gray-100 dark:border-gray-800">
+    <div id="shippingSection" class="px-6 py-4">
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Shipping To</h3>
+      <p id="shippingAddress" class="text-sm text-gray-600 dark:text-gray-400"></p>
+    </div>
+  </div>
+
+  <!-- What's next -->
+  <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-2xl px-6 py-5 mb-8">
+    <div class="flex gap-3">
+      <span class="text-xl shrink-0">📦</span>
+      <div>
+        <p class="font-semibold text-amber-800 dark:text-amber-300 text-sm mb-1">What happens next?</p>
+        <ul class="text-sm text-amber-700 dark:text-amber-400 space-y-1">
+          <li>• You'll receive an order confirmation email shortly</li>
+          <li>• Your items will be packaged and dispatched within 1 business day</li>
+          <li>• Estimated delivery: 2–5 business days</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="text-center">
+    <a href="/"
+      class="inline-block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-2xl text-base transition-colors duration-150 shadow-md">
+      Continue Shopping
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const order   = JSON.parse(sessionStorage.getItem('sw_order') || '{}');
+  const address = order.address || {};
+  const items   = order.items   || [];
+  const total   = parseFloat(order.total || 0);
+  const subtotal = total / 1.08;
+  const tax      = total - subtotal;
+  const fallback = 'https://placehold.co/64x64/e0e7ff/6366f1?text=Item';
+
+  // Order meta
+  document.getElementById('orderNumber').textContent = order.orderNumber || 'SW-DEMO';
+  document.getElementById('orderDate').textContent = new Date().toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  // Items
+  document.getElementById('orderItems').innerHTML = items.length
+    ? items.map(item => `
+        <div class="flex gap-4 items-center">
+          <img src="${item.image_url || fallback}" onerror="this.src='${fallback}'"
+            alt="${item.name}" class="w-14 h-14 rounded-xl object-cover bg-gray-100 dark:bg-gray-800 shrink-0" />
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">${item.name}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Qty: ${item.quantity}</p>
+          </div>
+          <p class="text-sm font-bold text-gray-900 dark:text-gray-100 shrink-0">$${(item.price * item.quantity).toFixed(2)}</p>
+        </div>
+      `).join('')
+    : '<p class="text-sm text-gray-400 dark:text-gray-500">No items</p>';
+
+  // Totals
+  document.getElementById('orderSubtotal').textContent = '$' + subtotal.toFixed(2);
+  document.getElementById('orderTax').textContent      = '$' + tax.toFixed(2);
+  document.getElementById('orderTotal').textContent    = '$' + total.toFixed(2);
+
+  // Shipping address
+  if (address.firstName) {
+    const parts = [
+      `${address.firstName} ${address.lastName}`,
+      address.address1,
+      address.address2,
+      `${address.city}${address.state ? ', ' + address.state : ''} ${address.zip}`,
+      address.country,
+    ].filter(Boolean);
+    document.getElementById('shippingAddress').textContent = parts.join(', ');
+  } else {
+    document.getElementById('shippingSection').classList.add('hidden');
+  }
+
+  // Clean up sessionStorage
+  sessionStorage.removeItem('sw_address');
+  sessionStorage.removeItem('sw_order');
+</script>
+{% endblock %}

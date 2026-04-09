@@ -1,192 +1,231 @@
-# 🛍️ ShopWise — AI-Powered E-Commerce Search
+# 🛍️ ShopWise — AI-Powered Electronics Store
 
-ShopWise is a full-stack RAG (Retrieval-Augmented Generation) application that lets shoppers find products using natural language. Describe your situation — *"going to the beach"*, *"gift for my dad"* — and the AI finds the best matching products using semantic vector search, Cohere reranking, and a GPT-4o generated recommendation.
+ShopWise is a full-stack RAG (Retrieval-Augmented Generation) e-commerce application. Shoppers describe what they need in plain English — *"wireless headphones for the gym"*, *"laptop for a college student"* — and the AI finds and recommends the best-matching electronics using semantic vector search, Cohere reranking, and Groq LLM-generated recommendations.
 
-**Stack**: FastAPI · LangChain · OpenAI (embeddings + GPT-4o) · Cohere Rerank · Supabase (PostgreSQL + pgvector) · Tailwind CSS · Render
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
 
 ---
 
-## 🚀 Supabase Setup
+## ✨ Features
 
-> Run once before your first deploy.
+- **Natural language product search** — powered by Cohere embeddings + pgvector similarity
+- **AI recommendations** — Llama 3.3 70B (via Groq) generates contextual recommendation blurbs
+- **Cohere reranking** — top-k vector results re-ranked for precision before LLM generation
+- **Product detail pages** — image, star ratings, Prime badge, feature bullets, customer reviews
+- **Sliding cart drawer** — persistent localStorage cart with quantity controls
+- **Full checkout flow** — address form → mock payment → order confirmation
+- **HuggingFace dataset ingestion** — script to pull 100 real Electronics products from Amazon Reviews 2023
+- **Dark mode** — system-aware with manual toggle, persisted to localStorage
+- **Admin upload** — drag-and-drop CSV ingestion with live vectorisation progress
+- **Render-ready** — `render.yaml` for one-click deploy
 
-1. **Create a Supabase project** at [supabase.com](https://supabase.com).
+---
 
-2. **Run the init SQL** — go to your project → SQL Editor → paste and run `init-db/init.sql`:
-   ```sql
-   CREATE EXTENSION IF NOT EXISTS vector;
-   CREATE TABLE IF NOT EXISTS products ( ... );
-   ```
+## 🏗️ Architecture
 
-3. **Get your connection string** — Project Settings → Database → Connection string → URI (Session mode, port 5432).  
-   Change the scheme to `postgresql+psycopg://`:
-   ```
-   postgresql+psycopg://postgres:[PASSWORD]@db.[ref].supabase.co:5432/postgres
-   ```
+```
+User query
+    │
+    ▼
+Cohere embed-english-v3.0          ← query embedding
+    │
+    ▼
+pgvector similarity search (k=5)   ← Supabase PostgreSQL
+    │
+    ▼
+Cohere rerank-multilingual-v3.0    ← top 3 reranked docs
+    │
+    ▼
+Groq Llama 3.3 70B                 ← recommendation blurb
+    │
+    ▼
+FastAPI + Jinja2 + Tailwind CSS    ← rendered to browser
+```
 
-4. **Set env vars** — copy `.env.example` → `.env` and fill in your keys.
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | FastAPI, SQLAlchemy (async), asyncpg |
+| **Database** | Supabase (PostgreSQL + pgvector) |
+| **Embeddings** | Cohere `embed-english-v3.0` |
+| **Reranking** | Cohere `rerank-multilingual-v3.0` |
+| **LLM** | Groq `llama-3.3-70b-versatile` |
+| **Orchestration** | LangChain |
+| **Frontend** | Jinja2 templates, Tailwind CSS, Vanilla JS |
+| **Dataset** | HuggingFace McAuley-Lab/Amazon-Reviews-2023 |
+| **Deployment** | Render |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- A [Supabase](https://supabase.com) project (free tier works)
+- API keys for [Cohere](https://dashboard.cohere.com) and [Groq](https://console.groq.com)
+
+### 1. Clone & install
+
+```bash
+git clone https://github.com/jontziv/EcommerceRAG.git
+cd EcommerceRAG
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. Set up Supabase
+
+In your Supabase project → **SQL Editor**, run `init-db/init.sql`:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+-- (full schema in init-db/init.sql)
+```
+
+> **Existing Supabase project?** Run `migrations/001_add_product_fields.sql` instead.
+
+### 3. Configure environment
+
+```bash
+cp .env.example .env
+# Fill in COHERE_API_KEY, GROQ_API_KEY, DATABASE_URL
+```
+
+Your `DATABASE_URL` should use the `postgresql+psycopg://` scheme (Session mode, port 5432):
+```
+DATABASE_URL=postgresql+psycopg://postgres:[PASSWORD]@db.[ref].supabase.co:5432/postgres
+```
+
+### 4. (Optional) Fetch real product data
+
+Pull 100 Electronics products + reviews from HuggingFace:
+
+```bash
+# Requires datasets<3.0 — already pinned in requirements.txt
+python -m scripts.fetch_electronics
+```
+
+This streams `McAuley-Lab/Amazon-Reviews-2023` and writes an enriched CSV to `uploads/product_real_data.csv`. Takes ~5–10 minutes depending on connection speed.
+
+### 5. Run
+
+```bash
+uvicorn app.api:app --reload --port 8000
+```
+
+The app **auto-seeds** the database from `uploads/product_real_data.csv` on first startup if the products table is empty.
+
+| URL | Description |
+|---|---|
+| `http://localhost:8000` | Storefront + AI search |
+| `http://localhost:8000/product/{id}` | Product detail page |
+| `http://localhost:8000/checkout` | Checkout flow |
+| `http://localhost:8000/admin` | CSV upload & vectorisation |
 
 ---
 
 ## 🔑 Environment Variables
 
-| Variable | Description |
-|---|---|
-| `OPENAI_API_KEY` | OpenAI API key (embeddings + GPT-4o) |
-| `COHERE_API_KEY` | Cohere API key (reranking) |
-| `DATABASE_URL` | Supabase connection string (`postgresql+psycopg://...`) |
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ | Supabase connection string (`postgresql+psycopg://...`) |
+| `COHERE_API_KEY` | ✅ | Cohere API key — embeddings & reranking |
+| `GROQ_API_KEY` | ✅ | Groq API key — Llama 3.3 70B inference |
 
 ---
 
-## 🧪 Running Locally
+## 📤 CSV Format
 
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+### Required columns
 
-# 2. Copy and fill in environment variables
-cp .env.example .env
+| Column | Type | Example |
+|---|---|---|
+| `id` | string | `B09XYZ123` |
+| `name` | string | `Sony WH-1000XM5 Headphones` |
+| `description` | string | `Industry-leading noise cancelling...` |
+| `price` | float | `279.99` |
+| `category` | string | `Electronics` |
+| `image_url` | string | `https://...` |
 
-# 3. Start the server
-uvicorn app.api:app --reload --port 8000
-```
+### Optional columns (enable full product experience)
 
-- Storefront: http://localhost:8000
-- Admin upload: http://localhost:8000/admin
-
-> Alternatively, use Docker: `docker-compose up --build` (still requires a Supabase DATABASE_URL in .env)
-
----
-
-## 📤 Uploading Products
-
-1. Go to `/admin`
-2. Drag & drop or browse for your CSV file
-3. Required columns: `id, name, description, price, category, image_url`
-4. Click **Upload & Vectorize** — products are upserted into Supabase and embedded into pgvector
+| Column | Type | Description |
+|---|---|---|
+| `rating` | float | Average star rating (0–5) |
+| `review_count` | int | Total number of ratings |
+| `brand` | string | Manufacturer/brand name |
+| `prime_eligible` | bool | Shows Prime badge |
+| `features` | JSON array | Bullet point feature list |
+| `reviews` | JSON array | Customer review objects |
 
 ---
 
-## 🔍 How Search Works
+## 🚢 Deploy to Render
 
-```
-User query  →  OpenAI embeddings  →  pgvector similarity (k=5)
-           →  Cohere rerank (top 3)
-           →  GPT-4o generates recommendation blurb
-           →  Fetch full product details from Supabase
-           →  Return answer + product cards
-```
+1. Fork/push this repo to GitHub
+2. Go to [render.com](https://render.com) → **New** → **Web Service** → connect your repo
+3. Render auto-detects `render.yaml`
+4. Add the three environment variables in **Environment** tab
+5. Click **Deploy**
 
----
-
-## 🚢 Deploying on Render
-
-1. Push this repo to GitHub.
-2. Go to [render.com](https://render.com) → New → Web Service → connect repo.
-3. Render detects `render.yaml` automatically.
-4. Set the three env vars in the Render dashboard (Environment tab).
-5. Deploy — done.
-
----
-
-## 🚀 Features
-
-- Upload and parse product CSVs with metadata
-- Generate embeddings using OpenAI models
-- Store data and vectors in PostgreSQL (`pgvector`)
-- Perform semantic vector search with LangChain
-- Run using Docker and Docker Compose
+> Run `init-db/init.sql` (or `migrations/001_add_product_fields.sql`) in Supabase before the first deploy. The app seeds itself automatically on first startup.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-smartfind/
+shopwise/
 ├── app/
-│   ├── __init__.py              # App factory
-│   ├── api/
-│   │   ├── search.py            # Search API
-│   │   └── vectorization.py     # File upload + embedding logic
-│   ├── config.py                # Flask + environment configs
-│   ├── database.py              # SQLAlchemy + PGVector init
-│   ├── models.py                # SQLAlchemy models
-│   ├── utils.py                 # Helpers (e.g., file type check)
-│   └── templates/
-│       └── index.html           # Frontend template
+│   ├── api.py              # FastAPI routes (search, product detail, checkout, admin)
+│   ├── database.py         # Async SQLAlchemy engine + Cohere embeddings
+│   ├── models.py           # ORM models (Product, ProductReview) + Pydantic schemas
+│   ├── search.py           # RAG pipeline: embed → pgvector → rerank → LLM
+│   └── vectorization.py    # CSV ingestion: upsert products + reviews + embeddings
+├── templates/
+│   ├── base.html           # Layout, dark mode, cart drawer
+│   ├── index.html          # AI search homepage
+│   ├── product.html        # Product detail page
+│   ├── admin.html          # CSV upload interface
+│   └── checkout/
+│       ├── address.html    # Shipping address form
+│       ├── payment.html    # Mock payment form
+│       └── confirmation.html # Order confirmation
+├── scripts/
+│   └── fetch_electronics.py  # HuggingFace dataset ingestion script
+├── migrations/
+│   └── 001_add_product_fields.sql  # Supabase migration for new fields
 ├── init-db/
-│   └── init.sql                 # DB schema and index creation
-├── product_real_data.csv        # Sample product data
-├── .env                         # Secrets (OpenAI key, DB URL)
-├── Dockerfile                   # Flask app Docker config
-├── docker-compose.yml           # Multi-container setup
-├── requirements.txt             # Python dependencies
-└── run.py                       # Entrypoint for Flask app
+│   └── init.sql            # Full schema for fresh Supabase projects
+├── uploads/
+│   └── product_real_data.csv  # Seed product data (auto-loaded on startup)
+├── render.yaml             # Render deployment config
+├── docker-compose.yml      # Local Docker setup (Postgres + Redis)
+└── requirements.txt
 ```
 
 ---
 
-## 🧪 How to Run
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/yourname/smartfind.git
-cd smartfind
-```
-
-### 2. Add Your API Key
-
-Update `.env`:
-```env
-OPENAI_API_KEY=sk-...
-DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
-```
-
-### 3. Start the App with Docker
+## 🐳 Docker (local development)
 
 ```bash
 docker-compose up --build
 ```
 
-The app will be available at: [http://localhost:5000](http://localhost:5000)
+Starts FastAPI on port 8000, PostgreSQL with pgvector on 5432, and Redis on 6379. Requires `DATABASE_URL` pointing to the local Postgres instance in your `.env`.
 
 ---
 
-## 📄 CSV Format
+## 🧪 RAG Evaluation
 
-Ensure your uploaded CSV follows this format:
+Quality evaluation using [RAGAS](https://docs.ragas.io) (faithfulness, answer relevancy, context precision, context recall):
 
-| id | name         | description             | price | category  | image_url           |
-|----|--------------|--------------------------|-------|-----------|----------------------|
-| 1  | Apple Watch  | Smart wearable device    | 299   | Electronics| http://example.com/1 |
-| 2  | Leather Bag  | Stylish and durable bag  | 150   | Fashion   | http://example.com/2 |
+```bash
+python -m app.eval_rags
+```
 
----
-
-## 🔍 How It Works
-
-- **Upload Page**: Upload a CSV → parses data → generates embeddings
-- **Database**: Vectors and metadata stored in `product_embeddings` table
-- **Search**: Uses OpenAI + LangChain’s `PGVector` to return top results
-
----
-
-## 🧱 Built With
-
-- [Flask](https://flask.palletsprojects.com/)
-- [LangChain](https://www.langchain.com/)
-- [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings)
-- [PostgreSQL](https://www.postgresql.org/) + [pgvector](https://github.com/pgvector/pgvector)
-- [Docker](https://www.docker.com/)
-
----
-
-## 🧠 Future Improvements
-
-- Add authentication
-- Advanced filtering (price range, category)
-- Switch to `langchain_postgres` PGVector store
-- UI polish and error handling
-
----
+Runs against the sample Q&A pairs in `seed/qna_test.json`.

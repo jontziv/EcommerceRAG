@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — ShopWise{% endblock %}
+
+{% block content %}
+
+{% set rating_val = product.rating | float %}
+{% set full_stars = rating_val | int %}
+{% set half_star  = ((rating_val - full_stars) >= 0.5) %}
+{% set empty_stars = 5 - full_stars - (1 if half_star else 0) %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
+    <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
+    <span>/</span>
+    <span class="text-gray-400 dark:text-gray-500">{{ product.category or "Electronics" }}</span>
+    <span>/</span>
+    <span class="text-gray-700 dark:text-gray-300 line-clamp-2 max-w-xs">{{ product.name }}</span>
+  </nav>
+
+  <!-- Main product layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+
+    <!-- Left: Image -->
+    <div class="sticky top-20 self-start">
+      <div class="rounded-2xl overflow-hidden bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+        <img
+          id="mainImage"
+          src="{{ product.image_url }}"
+          alt="{{ product.name }}"
+          onerror="this.onerror=null;this.src='https://placehold.co/600x500/e0e7ff/6366f1?text=Product+Image'"
+          class="w-full object-contain max-h-[480px]"
+        />
+      </div>
+    </div>
+
+    <!-- Right: Info -->
+    <div class="flex flex-col gap-4">
+
+      <!-- Category + Prime badge -->
+      <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded-full">
+          {{ product.category or "Electronics" }}
+        </span>
+        {% if product.prime_eligible %}
+        <span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+          Prime
+        </span>
+        {% endif %}
+      </div>
+
+      <!-- Brand + Name -->
+      {% if product.brand %}
+      <p class="text-sm font-medium text-gray-500 dark:text-gray-400 -mb-2">
+        Visit the <span class="text-indigo-600 dark:text-indigo-400">{{ product.brand }}</span> Store
+      </p>
+      {% endif %}
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-snug">
+        {{ product.name }}
+      </h1>
+
+      <!-- Rating row -->
+      {% if rating_val > 0 %}
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-1">
+          {% for _ in range(full_stars) %}
+            <span class="text-amber-400 text-xl">★</span>
+          {% endfor %}
+          {% if half_star %}
+            <span class="text-amber-300 text-xl">★</span>
+          {% endif %}
+          {% for _ in range(empty_stars) %}
+            <span class="text-gray-300 dark:text-gray-600 text-xl">★</span>
+          {% endfor %}
+          <span class="ml-1 font-semibold text-gray-700 dark:text-gray-300">{{ "%.1f" | format(rating_val) }}</span>
+        </div>
+        {% if product.review_count %}
+        <a href="#reviews" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+          {{ "{:,}".format(product.review_count | int) }} ratings
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <hr class="border-gray-200 dark:border-gray-700">
+
+      <!-- Price -->
+      <div>
+        <p class="text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+          ${{ "%.2f" | format(product.price | float) }}
+        </p>
+        {% if product.prime_eligible %}
+        <p class="flex items-center gap-1.5 mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 11a2 2 0 002 2h8a2 2 0 002-2L19 8"/>
+          </svg>
+          <strong class="text-blue-600 dark:text-blue-400">FREE</strong>&nbsp;delivery — Prime eligible
+        </p>
+        {% endif %}
+      </div>
+
+      <hr class="border-gray-200 dark:border-gray-700">
+
+      <!-- Features -->
+      {% if product.features %}
+      <div>
+        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2 uppercase tracking-wide">About this item</h3>
+        <ul class="space-y-1.5">
+          {% for feature in product.features %}
+          <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <span class="text-indigo-500 mt-0.5 shrink-0">•</span>
+            <span>{{ feature }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <hr class="border-gray-200 dark:border-gray-700">
+      {% endif %}
+
+      <!-- Add to Cart -->
+      <div class="flex flex-col gap-3">
+        <button
+          id="addToCartBtn"
+          class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-2xl text-base transition-colors duration-150 shadow-md"
+        >
+          Add to Cart
+        </button>
+        <a href="/checkout"
+          class="w-full py-4 bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-gray-900 font-bold rounded-2xl text-base text-center transition-colors duration-150 shadow-md">
+          Buy Now
+        </a>
+      </div>
+
+      <!-- Trust signals -->
+      <div class="grid grid-cols-3 gap-3 text-center mt-2">
+        <div class="flex flex-col items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+          Secure Payment
+        </div>
+        <div class="flex flex-col items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Free Returns
+        </div>
+        <div class="flex flex-col items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Fast Shipping
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Description -->
+  {% if product.description %}
+  <div class="mb-12 max-w-3xl">
+    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Product Description</h2>
+    <div class="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+      {{ product.description }}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Reviews -->
+  <div id="reviews" class="mb-12">
+    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Customer Reviews</h2>
+
+    {% if rating_val > 0 %}
+    <div class="flex items-center gap-6 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 mb-8">
+      <div class="text-center shrink-0">
+        <p class="text-5xl font-extrabold text-gray-900 dark:text-gray-100">{{ "%.1f" | format(rating_val) }}</p>
+        <div class="flex justify-center mt-1 text-amber-400">
+          {% for _ in range(full_stars) %}<span>★</span>{% endfor %}
+          {% if half_star %}<span class="text-amber-300">★</span>{% endif %}
+          {% for _ in range(empty_stars) %}<span class="text-gray-300 dark:text-gray-600">★</span>{% endfor %}
+        </div>
+        {% if product.review_count %}
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ "{:,}".format(product.review_count | int) }} ratings</p>
+        {% endif %}
+      </div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        Customers find this product highly rated for its quality and value.
+      </div>
+    </div>
+    {% endif %}
+
+    {% if reviews %}
+    <div class="space-y-6">
+      {% for review in reviews %}
+      {% set rv = review.rating | float %}
+      {% set rv_full = rv | int %}
+      <div class="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div>
+            <p class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ review.reviewer_name }}</p>
+            <div class="flex items-center gap-1 mt-0.5">
+              {% for _ in range(rv_full) %}<span class="text-amber-400 text-sm">★</span>{% endfor %}
+              {% for _ in range(5 - rv_full) %}<span class="text-gray-300 dark:text-gray-600 text-sm">★</span>{% endfor %}
+            </div>
+          </div>
+          {% if review.verified_purchase %}
+          <span class="shrink-0 px-2.5 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full">
+            Verified Purchase
+          </span>
+          {% endif %}
+        </div>
+        {% if review.title %}
+        <p class="font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ review.title }}</p>
+        {% endif %}
+        {% if review.body %}
+        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ review.body }}</p>
+        {% endif %}
+        {% if review.helpful_votes %}
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">{{ review.helpful_votes }} people found this helpful</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-700">
+      <p class="text-4xl mb-3">💬</p>
+      <p class="text-gray-500 dark:text-gray-400">No reviews yet for this product.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const product = {{ product_json | safe }};
+
+  document.getElementById('addToCartBtn').addEventListener('click', () => {
+    addToCart(product);
+  });
+
+  // "Buy Now" — add to cart then go to checkout
+  document.querySelector('a[href="/checkout"]').addEventListener('click', (e) => {
+    e.preventDefault();
+    addToCart(product);
+    window.location.href = '/checkout';
+  });
+</script>
+{% endblock %}

@@ -13,11 +13,18 @@
   </div>
 
   <!-- Format hint -->
-  <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 rounded-xl text-sm text-blue-700 dark:text-blue-300">
-    <p class="font-semibold mb-1">Required CSV columns:</p>
-    <code class="font-mono text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded">
+  <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 rounded-xl text-sm text-blue-700 dark:text-blue-300 space-y-2">
+    <p class="font-semibold">Required columns:</p>
+    <code class="block font-mono text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded">
       id, name, description, price, category, image_url
     </code>
+    <p class="font-semibold mt-2">Optional columns (enable ratings, reviews &amp; Prime badge):</p>
+    <code class="block font-mono text-xs bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded">
+      rating, review_count, brand, prime_eligible, features (JSON array), reviews (JSON array)
+    </code>
+    <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
+      Use <strong>scripts/fetch_electronics.py</strong> to generate a fully enriched CSV from the HuggingFace Amazon Reviews 2023 dataset.
+    </p>
   </div>
 
   <!-- Drop zone -->
