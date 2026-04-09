@@ -1,14 +1,15 @@
+import json
 import os
-from typing import Optional, Sequence
+from typing import Optional, List, Sequence
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_cohere import CohereRerank
-from sqlalchemy import select
+from sqlalchemy import text, select
 
-from .database import get_vector_store, AsyncSessionLocal
+from .database import AsyncSessionLocal, async_engine, embeddings, COLLECTION_NAME
 from .models import Product, SearchResult
 
 SYSTEM = """You are a friendly product search assistant for ShopWise, a modern e-commerce store.
@@ -30,13 +31,64 @@ def _format_docs(docs: Sequence[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)
 
 
+async def _vector_search(query: str, k: int = 5) -> List[Document]:
+    """
+    Raw async pgvector similarity search.
+    Bypasses langchain-postgres ORM entirely to avoid the
+    'tuple as dict key (unhashable type: dict)' SQLAlchemy cache bug
+    present in langchain-postgres 0.0.17.
+    """
+    query_embedding = await embeddings.aembed_query(query)
+    # PostgreSQL vector literal format: [0.1, 0.2, ...]
+    emb_literal = "[" + ",".join(str(float(v)) for v in query_embedding) + "]"
+
+    sql = text("""
+        SELECT
+            lpe.document,
+            lpe.cmetadata,
+            lpe.embedding <=> CAST(:emb AS vector) AS distance
+        FROM langchain_pg_embedding lpe
+        JOIN langchain_pg_collection lpc ON lpe.collection_id = lpc.uuid
+        WHERE lpc.name = :collection
+        ORDER BY distance ASC
+        LIMIT :k
+    """)
+
+    async with async_engine.connect() as conn:
+        result = await conn.execute(
+            sql, {"emb": emb_literal, "collection": COLLECTION_NAME, "k": k}
+        )
+        rows = result.fetchall()
+
+    docs = []
+    for row in rows:
+        raw = row.cmetadata
+        if isinstance(raw, str):
+            try:
+                metadata = json.loads(raw)
+            except Exception:
+                metadata = {}
+        elif isinstance(raw, dict):
+            metadata = raw
+        else:
+            metadata = {}
+        docs.append(Document(page_content=row.document or "", metadata=metadata))
+
+    return docs
+
+
 async def search_products(query: str, category: Optional[str] = None) -> SearchResult:
-    store = get_vector_store()
+    # 1. Raw vector similarity search (no langchain-postgres ORM in read path)
+    initial_docs = await _vector_search(query, k=5)
 
-    # 1. Vector similarity search — initial candidates
-    initial_docs = await store.asimilarity_search(query, k=5)
+    if not initial_docs:
+        return SearchResult(
+            answer="I couldn't find any matching products. The catalog may still be loading — try again in a moment.",
+            products=[],
+            contexts=[],
+        )
 
-    # 2. Cohere rerank — keep top 3 most relevant
+    # 2. Cohere rerank — top 3
     compressor = CohereRerank(top_n=3, model="rerank-multilingual-v3.0")
     docs = list(await compressor.acompress_documents(initial_docs, query))
 
